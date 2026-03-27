@@ -215,7 +215,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setConnectionError(null);
       const { error } = await withTimeout(
         supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`,
+          redirectTo: `${window.location.origin}/auth`,
         }),
         10000,
         'Password reset timed out. Please try again.'

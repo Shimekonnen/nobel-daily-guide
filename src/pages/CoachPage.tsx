@@ -96,6 +96,7 @@ export default function CoachPage() {
   const [speechSupported, setSpeechSupported] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [interimTranscript, setInterimTranscript] = useState('');
+  const [aiError, setAiError] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -248,6 +249,7 @@ export default function CoachPage() {
     stopListening();
     setLoading(true);
     setResponse(null);
+    setAiError(null);
 
     try {
       const result = await getParentingGuidance(textToSubmit);
@@ -258,6 +260,7 @@ export default function CoachPage() {
       await loadHistory();
     } catch (error) {
       console.error('Error getting guidance:', error);
+      setAiError('Unable to get guidance right now. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -381,6 +384,15 @@ ${response.why_it_works}`;
             </div>
           )}
 
+          {/* iOS Safari voice input note */}
+          {isIOSSafari && !speechSupported && (
+            <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                Voice input may not work in Safari. Try typing your question instead, or use Chrome for voice input.
+              </p>
+            </div>
+          )}
+
           {/* Quick Scenarios */}
           <div className="mt-4">
             <p className="text-xs text-text-muted mb-2 uppercase tracking-wide font-medium">
@@ -411,6 +423,23 @@ ${response.why_it_works}`;
             <p className="text-text-muted text-sm mt-1">
               Analyzing the situation with whole-brain strategies
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* AI Error State */}
+      {aiError && !loading && (
+        <div className="px-4 mt-6">
+          <div className="bg-red-50 rounded-2xl border border-red-200 p-6 text-center">
+            <XCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
+            <p className="text-red-800 font-medium mb-2">Something went wrong</p>
+            <p className="text-red-600 text-sm mb-4">{aiError}</p>
+            <button
+              onClick={() => handleSubmit()}
+              className="px-4 py-2 bg-coach text-white rounded-lg hover:bg-coach-dark transition-colors text-sm font-medium"
+            >
+              Try Again
+            </button>
           </div>
         </div>
       )}

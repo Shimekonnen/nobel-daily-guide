@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   TrendingUp,
   TrendingDown,
@@ -9,6 +10,7 @@ import {
   Sparkles,
   CheckCircle,
   XCircle,
+  Brain,
 } from 'lucide-react';
 import {
   LineChart,
@@ -249,6 +251,7 @@ function AssessmentDetail({
 // ============================================================================
 
 export default function ProgressPage() {
+  const navigate = useNavigate();
   const [skillCards, setSkillCards] = useState<SkillCardData[]>([]);
   const [recentAssessments, setRecentAssessments] = useState<AssessmentSession[]>([]);
   const [loading, setLoading] = useState(true);
@@ -538,11 +541,20 @@ export default function ProgressPage() {
         <h2 className="text-lg font-semibold text-text mb-3">Recent Assessments</h2>
 
         {recentAssessments.length === 0 ? (
-          <div className="bg-surface rounded-2xl border border-border p-6 text-center">
-            <p className="text-text-muted">No assessments completed yet.</p>
-            <p className="text-sm text-text-muted mt-1">
-              Complete an assessment to see results here.
+          <div className="bg-surface rounded-2xl border border-border p-8 text-center">
+            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Brain className="w-8 h-8 text-purple-500" />
+            </div>
+            <h3 className="text-lg font-medium text-text mb-2">Ready to start learning?</h3>
+            <p className="text-text-muted mb-4 max-w-sm mx-auto">
+              Quick assessments help us personalize Nobel's learning journey. Each one takes just 2-3 minutes!
             </p>
+            <button
+              onClick={() => navigate('/assess')}
+              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-medium rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all shadow-md"
+            >
+              Start First Assessment
+            </button>
           </div>
         ) : (
           <div className="space-y-3">

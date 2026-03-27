@@ -377,6 +377,50 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* Quick Actions Section */}
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold text-text mb-3 flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-purple-500" />
+          Quick Actions
+        </h2>
+
+        <div className="bg-surface rounded-2xl border border-border shadow-sm overflow-hidden divide-y divide-border">
+          {/* Generate New Plan */}
+          <button
+            onClick={() => navigate('/today')}
+            className="w-full p-4 sm:p-5 flex items-center justify-between hover:bg-slate-50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-blue-600" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-medium text-text">Generate Today's Plan</h3>
+                <p className="text-sm text-text-muted">Create a new AI-powered daily schedule</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-text-muted" />
+          </button>
+
+          {/* Start Assessment */}
+          <button
+            onClick={() => navigate('/assess')}
+            className="w-full p-4 sm:p-5 flex items-center justify-between hover:bg-slate-50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                <Brain className="w-5 h-5 text-purple-600" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-medium text-text">Start Assessment</h3>
+                <p className="text-sm text-text-muted">Run a quick skill check for {childProfile?.name || 'your child'}</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-text-muted" />
+          </button>
+        </div>
+      </div>
+
       {/* Data Management Section */}
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-text mb-3 flex items-center gap-2">

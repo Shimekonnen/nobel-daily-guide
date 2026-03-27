@@ -19,6 +19,9 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
+// Book status type
+type BookStatus = 'recommended' | 'reading' | 'completed';
+
 // Mock book data
 interface Book {
   id: string;
@@ -31,7 +34,7 @@ interface Book {
   learningConnection: string;
   pageCount: number;
   readingTime: string;
-  isRead: boolean;
+  status: BookStatus;
   availabilityHint: string;
 }
 
@@ -88,7 +91,7 @@ const mockBooks: Book[] = [
     learningConnection: 'Emotional awareness and identifying feelings',
     pageCount: 40,
     readingTime: '10-15 min',
-    isRead: false,
+    status: 'recommended',
     availabilityHint: 'Find at CRRL',
   },
   {
@@ -103,7 +106,7 @@ const mockBooks: Book[] = [
     learningConnection: 'Naming emotions and understanding they\'re all okay',
     pageCount: 32,
     readingTime: '8-10 min',
-    isRead: false,
+    status: 'reading',
     availabilityHint: 'Find at CRRL',
   },
   {
@@ -118,7 +121,7 @@ const mockBooks: Book[] = [
     learningConnection: 'Perspective-taking and positive thinking',
     pageCount: 32,
     readingTime: '10-12 min',
-    isRead: false,
+    status: 'recommended',
     availabilityHint: 'Find at CRRL',
   },
   {
@@ -133,7 +136,7 @@ const mockBooks: Book[] = [
     learningConnection: 'Creative imagination and open-ended play',
     pageCount: 32,
     readingTime: '5-8 min',
-    isRead: false,
+    status: 'recommended',
     availabilityHint: 'Find at CRRL',
   },
   {
@@ -148,7 +151,7 @@ const mockBooks: Book[] = [
     learningConnection: 'Amharic literacy and cultural connection',
     pageCount: 24,
     readingTime: '15-20 min',
-    isRead: false,
+    status: 'completed',
     availabilityHint: 'Find at CRRL',
   },
 ];
@@ -254,11 +257,15 @@ export default function BooksPage() {
   const weekRange = useMemo(() => getWeekRange(), []);
   const weekLabel = `${formatDateShort(weekRange.start)} – ${formatDateShort(weekRange.end)}`;
 
-  const toggleBookRead = (bookId: string) => {
+  const cycleBookStatus = (bookId: string) => {
     setBooks((prev) =>
-      prev.map((book) =>
-        book.id === bookId ? { ...book, isRead: !book.isRead } : book
-      )
+      prev.map((book) => {
+        if (book.id !== bookId) return book;
+        const statusOrder: BookStatus[] = ['recommended', 'reading', 'completed'];
+        const currentIndex = statusOrder.indexOf(book.status);
+        const nextStatus = statusOrder[(currentIndex + 1) % statusOrder.length];
+        return { ...book, status: nextStatus };
+      })
     );
   };
 
@@ -272,7 +279,8 @@ export default function BooksPage() {
     );
   };
 
-  const booksRead = books.filter((b) => b.isRead).length;
+  const booksCompleted = books.filter((b) => b.status === 'completed').length;
+  const booksReading = books.filter((b) => b.status === 'reading').length;
   const activitiesCompleted = activities.filter((a) => a.isCompleted).length;
 
   return (
@@ -292,8 +300,11 @@ export default function BooksPage() {
         <div className="text-right">
           <div className="text-sm text-text-muted">Progress</div>
           <div className="text-lg font-semibold text-primary">
-            {booksRead}/{books.length} read
+            {booksCompleted}/{books.length} done
           </div>
+          {booksReading > 0 && (
+            <div className="text-xs text-amber-600">{booksReading} reading</div>
+          )}
         </div>
       </div>
 
@@ -322,11 +333,19 @@ export default function BooksPage() {
         <div className="space-y-3">
           {books.map((book) => {
             const colors = categoryColors[book.category];
+            const statusConfig = {
+              recommended: { icon: Circle, color: 'text-gray-400', bg: 'bg-gray-100', label: 'To Read' },
+              reading: { icon: BookOpen, color: 'text-amber-500', bg: 'bg-amber-100', label: 'Reading' },
+              completed: { icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-100', label: 'Done' },
+            };
+            const currentStatus = statusConfig[book.status];
+            const StatusIcon = currentStatus.icon;
+
             return (
               <div
                 key={book.id}
                 className={`bg-surface rounded-2xl border border-border shadow-sm overflow-hidden transition-all ${
-                  book.isRead ? 'opacity-75' : ''
+                  book.status === 'completed' ? 'opacity-75' : ''
                 }`}
               >
                 <div className="p-4">
@@ -342,23 +361,21 @@ export default function BooksPage() {
                         <div>
                           <h3
                             className={`font-semibold text-text ${
-                              book.isRead ? 'line-through' : ''
+                              book.status === 'completed' ? 'line-through' : ''
                             }`}
                           >
                             {book.title}
                           </h3>
                           <p className="text-sm text-text-muted">{book.author}</p>
                         </div>
+                        {/* Status Selector Button */}
                         <button
-                          onClick={() => toggleBookRead(book.id)}
-                          className="flex-shrink-0"
-                          aria-label={book.isRead ? 'Mark as unread' : 'Mark as read'}
+                          onClick={() => cycleBookStatus(book.id)}
+                          className={`flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${currentStatus.bg} ${currentStatus.color}`}
+                          aria-label={`Current status: ${currentStatus.label}. Tap to change.`}
                         >
-                          {book.isRead ? (
-                            <CheckCircle2 className="w-6 h-6 text-green-500" />
-                          ) : (
-                            <Circle className="w-6 h-6 text-text-muted" />
-                          )}
+                          <StatusIcon className="w-4 h-4" />
+                          <span>{currentStatus.label}</span>
                         </button>
                       </div>
 
