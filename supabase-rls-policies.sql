@@ -48,7 +48,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = daily_schedules.profile_id
+    WHERE child_profiles.id = daily_schedules.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -59,7 +59,7 @@ TO authenticated
 WITH CHECK (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = daily_schedules.profile_id
+    WHERE child_profiles.id = daily_schedules.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -70,7 +70,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = daily_schedules.profile_id
+    WHERE child_profiles.id = daily_schedules.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -81,7 +81,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = daily_schedules.profile_id
+    WHERE child_profiles.id = daily_schedules.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -95,7 +95,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM daily_schedules
-    JOIN child_profiles ON child_profiles.id = daily_schedules.profile_id
+    JOIN child_profiles ON child_profiles.id = daily_schedules.child_id
     WHERE daily_schedules.id = time_blocks.daily_schedule_id
     AND child_profiles.user_id = auth.uid()
   )
@@ -107,7 +107,7 @@ TO authenticated
 WITH CHECK (
   EXISTS (
     SELECT 1 FROM daily_schedules
-    JOIN child_profiles ON child_profiles.id = daily_schedules.profile_id
+    JOIN child_profiles ON child_profiles.id = daily_schedules.child_id
     WHERE daily_schedules.id = time_blocks.daily_schedule_id
     AND child_profiles.user_id = auth.uid()
   )
@@ -119,7 +119,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM daily_schedules
-    JOIN child_profiles ON child_profiles.id = daily_schedules.profile_id
+    JOIN child_profiles ON child_profiles.id = daily_schedules.child_id
     WHERE daily_schedules.id = time_blocks.daily_schedule_id
     AND child_profiles.user_id = auth.uid()
   )
@@ -131,7 +131,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM daily_schedules
-    JOIN child_profiles ON child_profiles.id = daily_schedules.profile_id
+    JOIN child_profiles ON child_profiles.id = daily_schedules.child_id
     WHERE daily_schedules.id = time_blocks.daily_schedule_id
     AND child_profiles.user_id = auth.uid()
   )
@@ -146,7 +146,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = skill_levels.profile_id
+    WHERE child_profiles.id = skill_levels.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -157,7 +157,7 @@ TO authenticated
 WITH CHECK (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = skill_levels.profile_id
+    WHERE child_profiles.id = skill_levels.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -168,7 +168,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = skill_levels.profile_id
+    WHERE child_profiles.id = skill_levels.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -179,7 +179,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = skill_levels.profile_id
+    WHERE child_profiles.id = skill_levels.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -193,7 +193,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = assessment_sessions.profile_id
+    WHERE child_profiles.id = assessment_sessions.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -204,7 +204,7 @@ TO authenticated
 WITH CHECK (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = assessment_sessions.profile_id
+    WHERE child_profiles.id = assessment_sessions.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -215,7 +215,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = assessment_sessions.profile_id
+    WHERE child_profiles.id = assessment_sessions.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -226,7 +226,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = assessment_sessions.profile_id
+    WHERE child_profiles.id = assessment_sessions.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -240,7 +240,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = activity_log.profile_id
+    WHERE child_profiles.id = activity_log.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -251,7 +251,7 @@ TO authenticated
 WITH CHECK (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = activity_log.profile_id
+    WHERE child_profiles.id = activity_log.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -262,7 +262,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = activity_log.profile_id
+    WHERE child_profiles.id = activity_log.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -273,7 +273,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = activity_log.profile_id
+    WHERE child_profiles.id = activity_log.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -287,7 +287,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = coaching_history.profile_id
+    WHERE child_profiles.id = coaching_history.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -298,7 +298,7 @@ TO authenticated
 WITH CHECK (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = coaching_history.profile_id
+    WHERE child_profiles.id = coaching_history.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -309,7 +309,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = coaching_history.profile_id
+    WHERE child_profiles.id = coaching_history.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -320,7 +320,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = coaching_history.profile_id
+    WHERE child_profiles.id = coaching_history.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -334,7 +334,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = book_recommendations.profile_id
+    WHERE child_profiles.id = book_recommendations.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -345,7 +345,7 @@ TO authenticated
 WITH CHECK (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = book_recommendations.profile_id
+    WHERE child_profiles.id = book_recommendations.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -356,7 +356,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = book_recommendations.profile_id
+    WHERE child_profiles.id = book_recommendations.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -367,7 +367,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = book_recommendations.profile_id
+    WHERE child_profiles.id = book_recommendations.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -381,7 +381,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = activity_recommendations.profile_id
+    WHERE child_profiles.id = activity_recommendations.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -392,7 +392,7 @@ TO authenticated
 WITH CHECK (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = activity_recommendations.profile_id
+    WHERE child_profiles.id = activity_recommendations.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -403,7 +403,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = activity_recommendations.profile_id
+    WHERE child_profiles.id = activity_recommendations.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -414,7 +414,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = activity_recommendations.profile_id
+    WHERE child_profiles.id = activity_recommendations.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -428,7 +428,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = weekly_plans.profile_id
+    WHERE child_profiles.id = weekly_plans.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -439,7 +439,7 @@ TO authenticated
 WITH CHECK (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = weekly_plans.profile_id
+    WHERE child_profiles.id = weekly_plans.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -450,7 +450,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = weekly_plans.profile_id
+    WHERE child_profiles.id = weekly_plans.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
@@ -461,7 +461,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM child_profiles
-    WHERE child_profiles.id = weekly_plans.profile_id
+    WHERE child_profiles.id = weekly_plans.child_id
     AND child_profiles.user_id = auth.uid()
   )
 );
