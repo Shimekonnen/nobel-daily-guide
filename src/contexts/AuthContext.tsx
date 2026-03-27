@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseConfigError } from '../lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 import type { ChildProfile } from '../types/database';
 
@@ -8,6 +8,7 @@ interface AuthContextType {
   session: Session | null;
   childProfile: ChildProfile | null;
   loading: boolean;
+  configError: string | null;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -53,6 +54,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Get initial session
     const initializeAuth = async () => {
+      // If Supabase is not configured, stop loading and show error
+      if (supabaseConfigError) {
+        console.error('Supabase config error:', supabaseConfigError);
+        setLoading(false);
+        return;
+      }
+
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
 
@@ -139,6 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     childProfile,
     loading,
+    configError: supabaseConfigError,
     signIn,
     signUp,
     signOut,

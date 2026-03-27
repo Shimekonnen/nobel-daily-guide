@@ -23,8 +23,36 @@ function LoadingScreen() {
   );
 }
 
+function ConfigErrorScreen({ error }: { error: string }) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 flex items-center justify-center p-6">
+      <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md text-center">
+        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <span className="text-3xl">⚠️</span>
+        </div>
+        <h1 className="text-xl font-bold text-gray-900 mb-2">Configuration Error</h1>
+        <p className="text-gray-600 mb-4">{error}</p>
+        <div className="bg-gray-50 rounded-lg p-4 text-left text-sm">
+          <p className="font-medium text-gray-700 mb-2">To fix this:</p>
+          <ol className="list-decimal list-inside text-gray-600 space-y-1">
+            <li>Go to Vercel Dashboard → Settings → Environment Variables</li>
+            <li>Add <code className="bg-gray-200 px-1 rounded">VITE_SUPABASE_URL</code></li>
+            <li>Add <code className="bg-gray-200 px-1 rounded">VITE_SUPABASE_ANON_KEY</code></li>
+            <li>Redeploy the application</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
-  const { user, childProfile, loading } = useAuth();
+  const { user, childProfile, loading, configError } = useAuth();
+
+  // Show config error if Supabase is not configured
+  if (configError) {
+    return <ConfigErrorScreen error={configError} />;
+  }
 
   // Show loading screen while checking auth state
   if (loading) {
