@@ -1,11 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { BookOpen, Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { BookOpen, Mail, Lock, Eye, EyeOff, AlertCircle, CheckCircle, Loader2, WifiOff } from 'lucide-react';
 
 type AuthMode = 'signin' | 'signup' | 'forgot';
 
-export default function AuthPage() {
+interface AuthPageProps {
+  connectionError?: string | null;
+}
+
+export default function AuthPage({ connectionError: initialConnectionError }: AuthPageProps) {
   const [mode, setMode] = useState<AuthMode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,8 +19,18 @@ export default function AuthPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { signIn, signUp, resetPassword } = useAuth();
+  const { signIn, signUp, resetPassword, connectionError: authConnectionError } = useAuth();
   const navigate = useNavigate();
+
+  // Use either passed-in connection error or the one from auth context
+  const connectionError = initialConnectionError || authConnectionError;
+
+  // Clear form error when connection error appears
+  useEffect(() => {
+    if (connectionError) {
+      setError(null);
+    }
+  }, [connectionError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,6 +125,17 @@ export default function AuthPage() {
           >
             &larr; Back to Sign In
           </button>
+        )}
+
+        {/* Connection Error Banner */}
+        {connectionError && (
+          <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg flex items-start gap-2">
+            <WifiOff className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-orange-700">{connectionError}</p>
+              <p className="text-xs text-orange-600 mt-1">You can still try to sign in below.</p>
+            </div>
+          </div>
         )}
 
         {/* Error Message */}

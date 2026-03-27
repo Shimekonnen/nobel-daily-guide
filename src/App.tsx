@@ -10,14 +10,23 @@ import SettingsPage from './pages/SettingsPage';
 import CoachPage from './pages/CoachPage';
 import AuthPage from './pages/AuthPage';
 import SetupWizard from './pages/SetupWizard';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Calendar } from 'lucide-react';
 
 function LoadingScreen() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
       <div className="text-center">
-        <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
-        <p className="text-gray-500">Loading...</p>
+        {/* App branding */}
+        <div className="flex items-center justify-center gap-3 mb-6">
+          <div className="p-3 bg-blue-100 rounded-xl">
+            <Calendar className="w-8 h-8 text-blue-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">Daily Guide</h1>
+        </div>
+
+        {/* Spinner */}
+        <Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-3" />
+        <p className="text-gray-500">Loading your schedule...</p>
       </div>
     </div>
   );
@@ -47,23 +56,24 @@ function ConfigErrorScreen({ error }: { error: string }) {
 }
 
 function App() {
-  const { user, childProfile, loading, configError } = useAuth();
+  const { user, childProfile, loading, configError, connectionError } = useAuth();
 
   // Show config error if Supabase is not configured
   if (configError) {
     return <ConfigErrorScreen error={configError} />;
   }
 
-  // Show loading screen while checking auth state
+  // Show loading screen while checking auth state (max 3 seconds due to timeout)
   if (loading) {
     return <LoadingScreen />;
   }
 
-  // Not logged in - show auth page
+  // Not logged in (or connection failed) - show auth page
+  // Connection errors will be displayed on the auth page
   if (!user) {
     return (
       <Routes>
-        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/auth" element={<AuthPage connectionError={connectionError} />} />
         <Route path="*" element={<Navigate to="/auth" replace />} />
       </Routes>
     );
