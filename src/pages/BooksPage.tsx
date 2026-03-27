@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   BookOpen,
   Star,
@@ -15,6 +15,8 @@ import {
   Lightbulb,
   ChevronDown,
   ChevronUp,
+  Library,
+  RefreshCw,
 } from 'lucide-react';
 
 // Mock book data
@@ -47,57 +49,95 @@ interface Activity {
   isCompleted: boolean;
 }
 
-const LIBRARY_SEARCH_BASE = 'https://librarypoint.bibliocommons.com/v2/search?query=';
-const LIBRARY_SEARCH_SUFFIX = '&searchType=smart';
+// CRRL (Central Rappahannock Regional Library) catalog search
+const CRRL_SEARCH_URL = 'https://librarypoint.bibliocommons.com/v2/search?query=';
+const CRRL_SEARCH_SUFFIX = '&searchType=smart';
+
+// Get the current week's Monday and Sunday dates
+function getWeekRange(): { start: Date; end: Date; weekNumber: number } {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  monday.setHours(0, 0, 0, 0);
+
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+
+  // Calculate week number of the year
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  const weekNumber = Math.ceil(((now.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7);
+
+  return { start: monday, end: sunday, weekNumber };
+}
+
+function formatDateShort(date: Date): string {
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
 
 const mockBooks: Book[] = [
   {
     id: 'book-1',
-    title: 'Maps and Geography',
-    author: 'Ken Jennings',
+    title: 'The Color Monster',
+    author: 'Anna Llenas',
     category: 'this-week',
-    categoryLabel: "This Week's Read",
-    coverEmoji: '🗺️',
+    categoryLabel: 'Social-Emotional',
+    coverEmoji: '🎨',
     description:
-      'Explore the world through maps! Learn about continents, oceans, and how to read different types of maps.',
-    learningConnection: 'Connects to our geography exploration this week',
-    pageCount: 48,
-    readingTime: '20-25 min',
+      'A monster is confused about his feelings until a little girl helps him sort them out by color. Perfect for discussing emotions!',
+    learningConnection: 'Emotional awareness and identifying feelings',
+    pageCount: 40,
+    readingTime: '10-15 min',
     isRead: false,
-    availabilityHint: 'Check CRRL Library',
+    availabilityHint: 'Find at CRRL',
   },
   {
     id: 'book-2',
-    title: 'The Magic School Bus: Lost in the Solar System',
-    author: 'Joanna Cole',
-    category: 'challenge',
-    categoryLabel: 'Challenge Read',
-    coverEmoji: '🚀',
+    title: 'The Feelings Book',
+    author: 'Todd Parr',
+    category: 'this-week',
+    categoryLabel: 'Social-Emotional',
+    coverEmoji: '😊',
     description:
-      'Join Ms. Frizzle and her class on an adventure through space! Learn about planets, stars, and the solar system.',
-    learningConnection: 'Advanced vocabulary and science concepts',
-    pageCount: 40,
-    readingTime: '25-30 min',
+      'Colorful illustrations showing all kinds of feelings - silly, scared, brave, and more!',
+    learningConnection: 'Naming emotions and understanding they\'re all okay',
+    pageCount: 32,
+    readingTime: '8-10 min',
     isRead: false,
-    availabilityHint: 'Check CRRL Library',
+    availabilityHint: 'Find at CRRL',
   },
   {
     id: 'book-3',
-    title: 'Dragons Love Tacos',
-    author: 'Adam Rubin',
+    title: 'Pete the Cat and His Magic Sunglasses',
+    author: 'James Dean',
     category: 'fun',
     categoryLabel: 'Just for Fun',
-    coverEmoji: '🐉',
+    coverEmoji: '😎',
     description:
-      "A hilarious story about dragons who love tacos - but watch out for the spicy salsa!",
-    learningConnection: 'Humor, cause and effect, reading for pleasure',
+      'Pete the Cat is in a bad mood until he gets some magic sunglasses that help him see things differently!',
+    learningConnection: 'Perspective-taking and positive thinking',
     pageCount: 32,
-    readingTime: '10-15 min',
-    isRead: true,
-    availabilityHint: 'Check CRRL Library',
+    readingTime: '10-12 min',
+    isRead: false,
+    availabilityHint: 'Find at CRRL',
   },
   {
     id: 'book-4',
+    title: 'Not a Box',
+    author: 'Antoinette Portis',
+    category: 'challenge',
+    categoryLabel: 'Creative Thinking',
+    coverEmoji: '📦',
+    description:
+      'A rabbit shows that a box can be anything you imagine - a race car, a robot, a mountain!',
+    learningConnection: 'Creative imagination and open-ended play',
+    pageCount: 32,
+    readingTime: '5-8 min',
+    isRead: false,
+    availabilityHint: 'Find at CRRL',
+  },
+  {
+    id: 'book-5',
     title: 'ፊደል መማሪያ (Fidel Learning)',
     author: 'Ethiopian Children\'s Books',
     category: 'amharic',
@@ -109,22 +149,7 @@ const mockBooks: Book[] = [
     pageCount: 24,
     readingTime: '15-20 min',
     isRead: false,
-    availabilityHint: 'Check CRRL Library',
-  },
-  {
-    id: 'book-5',
-    title: 'National Geographic Little Kids First Big Book of Animals',
-    author: 'Catherine D. Hughes',
-    category: 'this-week',
-    categoryLabel: "This Week's Read",
-    coverEmoji: '🦁',
-    description:
-      'Meet amazing animals from around the world! Beautiful photos and fun facts about creatures big and small.',
-    learningConnection: 'Science vocabulary and animal classification',
-    pageCount: 128,
-    readingTime: '30+ min (sections)',
-    isRead: false,
-    availabilityHint: 'Check CRRL Library',
+    availabilityHint: 'Find at CRRL',
   },
 ];
 
@@ -225,6 +250,10 @@ export default function BooksPage() {
   const [activities, setActivities] = useState<Activity[]>(mockActivities);
   const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
 
+  // Calculate current week range
+  const weekRange = useMemo(() => getWeekRange(), []);
+  const weekLabel = `${formatDateShort(weekRange.start)} – ${formatDateShort(weekRange.end)}`;
+
   const toggleBookRead = (bookId: string) => {
     setBooks((prev) =>
       prev.map((book) =>
@@ -249,13 +278,16 @@ export default function BooksPage() {
   return (
     <div className="flex-1 p-4 sm:p-6 pb-24">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-4">
         <div className="p-3 bg-primary/10 rounded-xl">
           <BookOpen className="w-8 h-8 text-primary" />
         </div>
         <div className="flex-1">
           <h1 className="text-2xl font-semibold text-text">Books & Activities</h1>
-          <p className="text-text-muted">This week's recommendations</p>
+          <p className="text-text-muted flex items-center gap-1">
+            <RefreshCw className="w-3 h-3" />
+            Week of {weekLabel}
+          </p>
         </div>
         <div className="text-right">
           <div className="text-sm text-text-muted">Progress</div>
@@ -264,6 +296,21 @@ export default function BooksPage() {
           </div>
         </div>
       </div>
+
+      {/* CRRL Library Link */}
+      <a
+        href="https://librarypoint.bibliocommons.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-2 mb-6 p-3 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors"
+      >
+        <Library className="w-5 h-5 text-blue-600" />
+        <div className="flex-1">
+          <span className="font-medium text-blue-800">CRRL Library Catalog</span>
+          <span className="text-sm text-blue-600 ml-2">Search & reserve books</span>
+        </div>
+        <ExternalLink className="w-4 h-4 text-blue-400" />
+      </a>
 
       {/* Books Section */}
       <section className="mb-8">
@@ -346,16 +393,17 @@ export default function BooksPage() {
                     </div>
                   </div>
 
-                  {/* Library Availability */}
+                  {/* Library Search Link */}
                   <div className="mt-2">
                     <a
-                      href={`${LIBRARY_SEARCH_BASE}${book.title.replace(/ /g, '+')}${LIBRARY_SEARCH_SUFFIX}`}
+                      href={`${CRRL_SEARCH_URL}${encodeURIComponent(book.title)}${CRRL_SEARCH_SUFFIX}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                      className="inline-flex items-center gap-1.5 px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
                     >
-                      <ExternalLink className="w-3 h-3" />
+                      <Library className="w-3 h-3" />
                       {book.availabilityHint}
+                      <ExternalLink className="w-3 h-3" />
                     </a>
                   </div>
                 </div>
@@ -525,10 +573,15 @@ export default function BooksPage() {
       </section>
 
       {/* Refresh Note */}
-      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl text-center">
-        <p className="text-sm text-blue-700">
-          New book and activity recommendations refresh every Monday based on Nobel's
-          interests and learning progress.
+      <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl">
+        <div className="flex items-center gap-2 justify-center">
+          <RefreshCw className="w-4 h-4 text-blue-600" />
+          <p className="text-sm text-blue-700">
+            Recommendations refresh <strong>every Monday</strong> based on Nobel's weekly developmental focus.
+          </p>
+        </div>
+        <p className="text-xs text-blue-500 mt-1 text-center">
+          Click "Find at CRRL" to check availability and reserve books at your local library.
         </p>
       </div>
     </div>

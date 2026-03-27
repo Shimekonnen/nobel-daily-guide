@@ -84,7 +84,7 @@ const generateMockWeek = (): DaySchedule[] => {
   return days;
 };
 
-const generateDayItems = (dayIndex: number, isToday: boolean): ScheduleItem[] => {
+const generateDayItems = (dayIndex: number, _isToday: boolean): ScheduleItem[] => {
   // Different schedules for each day
   const schedules: ScheduleItem[][] = [
     // Monday

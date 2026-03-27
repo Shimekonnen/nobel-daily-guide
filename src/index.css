@@ -11,6 +11,8 @@
   --color-text: #1F2937;
   --color-text-muted: #6B7280;
   --color-border: #E5E7EB;
+  --color-coach: #E8927C;
+  --color-coach-dark: #D97B64;
 }
 
 body {
@@ -86,4 +88,18 @@ body {
 
 .animate-twinkle {
   animation: twinkle 1.5s ease-in-out infinite;
+}
+
+/* Voice input microphone pulse animation */
+@keyframes pulse-mic {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(239, 68, 68, 0);
+  }
+}
+
+.animate-pulse-mic {
+  animation: pulse-mic 1.5s ease-in-out infinite;
 }

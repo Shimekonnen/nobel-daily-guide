@@ -26,7 +26,34 @@ export type TimeBlockCategory =
   | 'reading'
   | 'dinner'
   | 'routine'
-  | 'cleanup';
+  | 'cleanup'
+  | 'free_play';
+
+// New: Developmental domains for the 7-domain framework
+export type DevelopmentalDomain =
+  | 'academic'
+  | 'social_emotional'
+  | 'executive_function'
+  | 'fine_motor'
+  | 'physical'
+  | 'creative'
+  | 'cultural';
+
+// New: Block display type (structured vs minimal)
+export type BlockDisplayType = 'structured' | 'minimal';
+
+// New: Parent feedback type
+export type ParentFeedback = 'positive' | 'negative' | null;
+
+// New: Worksheet types
+export type WorksheetType =
+  | 'math_worksheet'
+  | 'reading_comprehension'
+  | 'writing_practice'
+  | 'science_observation'
+  | 'fine_motor_tracing'
+  | 'social_emotional'
+  | null;
 export type TimeBlockDifficulty = 'easy' | 'moderate' | 'challenging';
 export type TimeBlockStatus = 'pending' | 'done' | 'skipped' | 'swapped';
 export type BookReadingApproach = 'independent' | 'read-aloud' | 'discussion';
@@ -38,6 +65,31 @@ export type ActivityCost = 'free' | 'under_10' | 'under_25' | 'over_25';
 export type ActivityStatus = 'recommended' | 'acquired' | 'completed' | 'skipped';
 export type SkillArea = 'reading' | 'math' | 'reasoning' | 'amharic' | 'vocabulary';
 export type EngagementLevel = 'high' | 'medium' | 'low';
+
+// ============================================================================
+// Coaching Types
+// ============================================================================
+
+export interface CoachingResponse {
+  strategy_name: string;
+  strategy_description: string;
+  whats_happening: string;
+  what_to_say: string[];
+  what_to_do: string[];
+  what_to_avoid: string[];
+  why_it_works: string;
+}
+
+export interface CoachingHistory {
+  id: string;
+  child_id: string;
+  scenario: string;
+  strategy_name: string;
+  response: CoachingResponse;
+  created_at: string;
+}
+
+export type CoachingHistoryInsert = Omit<CoachingHistory, 'id' | 'created_at'>;
 
 // ============================================================================
 // Table Row Types
@@ -101,6 +153,15 @@ export interface TimeBlock {
   completed_at: string | null;
   created_at: string;
   updated_at: string;
+  // New fields for simplified schedule
+  display_type: BlockDisplayType;
+  developmental_domain: DevelopmentalDomain | null;
+  has_worksheet: boolean;
+  worksheet_type: WorksheetType;
+  worksheet_prompt: string | null;
+  feedback: ParentFeedback;
+  setup_time_minutes: number | null;
+  cleanup_level: 'low' | 'medium' | 'high' | null;
 }
 
 export interface BookRecommendation {
@@ -279,6 +340,11 @@ export interface Database {
         Row: ActivityLog;
         Insert: ActivityLogInsert;
         Update: ActivityLogUpdate;
+      };
+      coaching_history: {
+        Row: CoachingHistory;
+        Insert: CoachingHistoryInsert;
+        Update: Partial<Omit<CoachingHistory, 'id' | 'child_id' | 'created_at'>>;
       };
     };
   };

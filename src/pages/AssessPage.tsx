@@ -20,7 +20,7 @@ import {
   type AssessmentQuestion,
 } from '../services/mockAssessment';
 import { getSetting } from '../services/settingsService';
-import type { SkillLevel, AssessmentSession } from '../types/database';
+import type { AssessmentSession } from '../types/database';
 
 // ============================================================================
 // Types

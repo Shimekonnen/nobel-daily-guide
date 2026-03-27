@@ -28,7 +28,7 @@ import {
   getSkillAreaColors,
   type SkillArea,
 } from '../services/assessmentService';
-import type { SkillLevel, AssessmentSession } from '../types/database';
+import type { AssessmentSession } from '../types/database';
 
 // ============================================================================
 // Types
