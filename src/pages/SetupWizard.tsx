@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { generateAndSaveSchedule } from '../services/scheduleService';
 import {
   User, BookOpen, Sparkles, Home, Check,
   ChevronRight, ChevronLeft, Loader2, AlertCircle
@@ -175,6 +176,14 @@ export default function SetupWizard() {
 
       // Refresh the auth context
       await refreshChildProfile();
+
+      // Auto-generate a sample schedule so user sees something immediately
+      try {
+        await generateAndSaveSchedule(undefined, true); // useMock = true
+      } catch (scheduleError) {
+        console.error('Failed to generate initial schedule:', scheduleError);
+        // Continue anyway - user can generate manually from /today
+      }
 
       // Navigate to today page
       navigate('/today');

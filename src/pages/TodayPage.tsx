@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import TimeBlockCard from '../components/TimeBlockCard';
 import WorksheetViewer from '../components/WorksheetViewer';
+import { useToast } from '../components/Toast';
 import {
   getTodaySchedule,
   generateAndSaveSchedule,
@@ -73,6 +74,7 @@ export default function TodayPage() {
   const [showMenu, setShowMenu] = useState(false);
   const [worksheetBlock, setWorksheetBlock] = useState<TimeBlock | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { showToast } = useToast();
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -136,6 +138,14 @@ export default function TodayPage() {
       if (result) {
         setTheme(result.theme);
         await fetchSchedule();
+
+        // Show toast if AI generation failed and we used fallback
+        if (result.usedFallback && !useMock) {
+          showToast(
+            'AI generation timed out — showing sample schedule. Try again later.',
+            'warning'
+          );
+        }
       }
     } catch (err) {
       if (err instanceof Error && err.message === 'ANTHROPIC_API_KEY_NOT_CONFIGURED') {

@@ -209,20 +209,37 @@ OUTPUT: Return ONLY this JSON structure (no markdown, no explanation):
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const startTime = Date.now();
+  console.log('[generate-schedule] Request received:', {
+    method: req.method,
+    timestamp: new Date().toISOString(),
+  });
+
   // Only allow POST
   if (req.method !== 'POST') {
+    console.log('[generate-schedule] Method not allowed:', req.method);
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
+    console.error('[generate-schedule] ANTHROPIC_API_KEY not configured');
     return res.status(500).json({ error: 'API key not configured' });
   }
+  console.log('[generate-schedule] API key present, length:', apiKey.length);
 
   try {
     const { childProfile, skillLevels, recentActivities, date } = req.body;
+    console.log('[generate-schedule] Request body:', {
+      hasChildProfile: !!childProfile,
+      childName: childProfile?.name,
+      date,
+      skillLevelsCount: skillLevels?.length || 0,
+      recentActivitiesCount: recentActivities?.length || 0,
+    });
 
     if (!childProfile || !date) {
+      console.error('[generate-schedule] Missing required fields');
       return res.status(400).json({ error: 'Missing required fields: childProfile, date' });
     }
 
@@ -233,6 +250,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       date
     );
     const userPrompt = `Generate 3 activities for ${date}. Make them engaging and age-appropriate.`;
+
+    console.log('[generate-schedule] Calling Anthropic API...');
+    const anthropicStartTime = Date.now();
 
     const response = await fetch(ANTHROPIC_API_URL, {
       method: 'POST',
@@ -249,16 +269,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }),
     });
 
+    const anthropicDuration = Date.now() - anthropicStartTime;
+    console.log('[generate-schedule] Anthropic API response:', {
+      status: response.status,
+      statusText: response.statusText,
+      durationMs: anthropicDuration,
+    });
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Anthropic API error:', errorText);
-      return res.status(500).json({ error: 'AI API request failed' });
+      console.error('[generate-schedule] Anthropic API error:', {
+        status: response.status,
+        body: errorText,
+      });
+      return res.status(500).json({
+        error: 'AI API request failed',
+        details: `Status ${response.status}: ${errorText.substring(0, 200)}`,
+      });
     }
 
     const data = await response.json();
+    console.log('[generate-schedule] Anthropic response received:', {
+      hasContent: !!data.content,
+      contentLength: data.content?.[0]?.text?.length || 0,
+      usage: data.usage,
+    });
+
     const content = data.content[0]?.text;
 
     if (!content) {
+      console.error('[generate-schedule] No content in response:', data);
       return res.status(500).json({ error: 'No content in API response' });
     }
 
@@ -268,10 +308,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .replace(/```\n?/g, '')
       .trim();
 
-    const aiResponse = JSON.parse(cleanedContent);
-    return res.status(200).json(aiResponse);
+    try {
+      const aiResponse = JSON.parse(cleanedContent);
+      const totalDuration = Date.now() - startTime;
+      console.log('[generate-schedule] Success:', {
+        theme: aiResponse.theme,
+        totalDurationMs: totalDuration,
+      });
+      return res.status(200).json(aiResponse);
+    } catch (parseError) {
+      console.error('[generate-schedule] JSON parse error:', {
+        error: parseError,
+        contentPreview: cleanedContent.substring(0, 500),
+      });
+      return res.status(500).json({
+        error: 'Failed to parse AI response',
+        details: 'Invalid JSON in API response',
+      });
+    }
   } catch (error) {
-    console.error('Error generating schedule:', error);
-    return res.status(500).json({ error: 'Failed to generate schedule' });
+    const totalDuration = Date.now() - startTime;
+    console.error('[generate-schedule] Unexpected error:', {
+      error: error instanceof Error ? error.message : error,
+      stack: error instanceof Error ? error.stack : undefined,
+      totalDurationMs: totalDuration,
+    });
+    return res.status(500).json({
+      error: 'Failed to generate schedule',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 }

@@ -154,10 +154,21 @@ export async function getTodaySchedule(): Promise<DailyScheduleWithBlocks | null
 // Generate Operations
 // ============================================================================
 
+// Timeout wrapper for fetch calls
+async function fetchWithTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number = 30000
+): Promise<T> {
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error('TIMEOUT')), timeoutMs);
+  });
+  return Promise.race([promise, timeoutPromise]);
+}
+
 export async function generateAndSaveSchedule(
   date: string = getToday(),
   useMock: boolean = false
-): Promise<{ schedule: DailySchedule; timeBlocks: TimeBlock[]; theme: string } | null> {
+): Promise<{ schedule: DailySchedule; timeBlocks: TimeBlock[]; theme: string; usedFallback?: boolean } | null> {
   try {
     // Get child profile
     const profile = await getChildProfile();
@@ -183,9 +194,10 @@ export async function generateAndSaveSchedule(
 
     let generatedData;
     let theme: string;
+    let usedFallback = false;
 
-    if (useMock || !import.meta.env.VITE_ANTHROPIC_API_KEY) {
-      // Use mock data
+    if (useMock) {
+      // User explicitly requested mock data
       const mock = getMockSchedule(date, profile.id);
       generatedData = {
         theme: mock.theme,
@@ -193,14 +205,29 @@ export async function generateAndSaveSchedule(
       };
       theme = mock.theme;
     } else {
-      // Get context data for AI
-      const skillLevels = await getSkillLevels(profile.id);
-      const recentActivities = await getRecentActivities(profile.id);
+      // Try AI generation with 30-second timeout
+      try {
+        const skillLevels = await getSkillLevels(profile.id);
+        const recentActivities = await getRecentActivities(profile.id);
 
-      // Generate via AI
-      const aiResponse = await generateDaySchedule(date, profile, skillLevels, recentActivities);
-      generatedData = aiResponse;
-      theme = aiResponse.theme;
+        // Generate via AI with timeout
+        const aiResponse = await fetchWithTimeout(
+          generateDaySchedule(date, profile, skillLevels, recentActivities),
+          30000
+        );
+        generatedData = aiResponse;
+        theme = aiResponse.theme;
+      } catch (aiError) {
+        // Fall back to mock on any AI error (timeout, API failure, etc.)
+        console.error('AI generation failed, using fallback:', aiError);
+        const mock = getMockSchedule(date, profile.id);
+        generatedData = {
+          theme: mock.theme,
+          time_blocks: mock.timeBlocks,
+        };
+        theme = mock.theme;
+        usedFallback = true;
+      }
     }
 
     // Create daily schedule
@@ -247,6 +274,7 @@ export async function generateAndSaveSchedule(
       schedule: newSchedule,
       timeBlocks: (newBlocks || []).map(augmentBlockWithDisplayFields),
       theme,
+      usedFallback,
     };
   } catch (error) {
     console.error('Error generating schedule:', error);
